@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {%load static%}
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- offline -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/bootstrap/bootstrap.min.css'%}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/bootstrap/icon/bootstrap-icons.css'%}"
+    />
+
+    <!-- online -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{%static 'images/ctu-logo.ico'%}"
+    />
+
+    <link rel="stylesheet" href="{% static 'css/login.css'%}" />
+    <title> Water Refelling System | Login</title>
+  </head>
+  <body>
+    <div
+      class="container d-flex justify-content-center align-items-center min-vh-90"
+    >
+      <div class="row border rounded-2 p-3 shadow box-area">
+        <div
+          class="col-md-6 rounded-4 d-flex justify-content-center align-items-center flex-column left-box"
+        >
+          <div class="featured-image mb-3">
+            <img
+              src="{% static 'images/water-pic.svg'%}"
+              class="img-fluid"
+              style="width: 250px"
+            />
+          </div>
+          <div class="login-text">
+            <p id="login-p" class="text-center fs-4">
+              Quenching Thirst, Sustaining Life: Your Oasis in Every Drop
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6 border border-4 rounded-2 right-box">
+          <form action="" method="POST">
+            {% csrf_token %}
+
+            <div class="row align-items-center justify-content-center">
+              <div class="ctu-logo">
+                <img class="" src="{%static 'images/water-logo.svg'%}" alt="" />
+              </div>
+              <div class="header-text mb-4">
+                <h6 class="text-center">Water Refilling System</h6>
+               
+              </div>
+              <h6 class="mb-4">Welcome back you've been missed</h6>
+              {%if msg%}
+              <p class="text-danger">{{msg}}</p>
+              {%endif%}
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"
+                  ><i class="bi bi-person-fill"></i
+                ></span>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="txtEmail"
+                  placeholder="Email"
+                  aria-label="Username"
+                  aria-describedby="basic-addon1"
+                />
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"
+                  ><i class="bi bi-key-fill"></i
+                ></span>
+                <input
+                  type="password"
+                  class="form-control"
+                  name="Password"
+                  placeholder="Password"
+                  aria-label="Username"
+                  aria-describedby="basic-addon1"
+                />
+              </div>
+              <div><p>Don't have an account? <a href="{%url 'user_register'%}">Register</a></p></div>
+              <div class="input-group mb-3">
+                <button class="mt-4 btn btn-lg btn-primary w-100 fs-6">
+                  Login
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="{% static 'bootstrap/bootstrap.min.js'%}"></script>
+  </body>
+</html>

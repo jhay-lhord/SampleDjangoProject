@@ -1,0 +1,90 @@
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                      <div class="text-xs font-weight-bold fs-4 text-opacity-75 text-primary text-uppercase mb-1">
+                         Customer</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{all_data.customers}}</div>
+                  </div>
+                  <div class="col-auto">
+                      <a class=" text-gray-300 stretched-link" href="{% url 'customer'%}">
+                        <i class="fa-solid fa-user-group fa-2x "></i>
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary fs-4 text-opacity-75 text-uppercase mb-1">
+                            Products</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{all_data.products}}</div>
+                    </div>
+                    <div class="col-auto">
+                      <a class=" text-gray-300 stretched-link" href="{% url 'product'%}">
+                        <i class="fa-brands fa-product-hunt fa-2x text-gray-300"></i>
+                      </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+          <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-primary fs-4 text-opacity-75 text-uppercase mb-1">
+                          Transaction</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{all_data.transactions}}</div>
+                  </div>
+                  <div class="col-auto">
+                     
+                      <a class=" text-gray-300 stretched-link" href="{% url 'transaction'%}">
+                        <i class="fa-solid fa-receipt fa-2x text-gray-300"></i>
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+    <!-- Pending Requests Card Example -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-opacity-75 fs-4 text-uppercase mb-1">
+                            Sales</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                          {%if total_sales%}
+                            {{total_sales.sales}}
+                          {%else%}
+                            0
+                          {%endif%}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                      
+                      <a class=" text-gray-300 stretched-link" href="{% url 'sales'%}">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                      </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>

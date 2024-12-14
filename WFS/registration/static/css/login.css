@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
+
+:root {
+  --dark-green: #006431;
+  /* --green: #01A853; */
+  --green: #198754;
+  --light-green: #d4f7d8;
+  /* --light-green: #d1e7dd; */
+  --black: #241e1e;
+  --white: #f5f5f5;
+  --beige: #f5f5dc;
+  --gray: #7b7c7d;
+  --celestial-blue: #39A0ED;
+
+}
+body {
+  font-family: "Poppins", sans-serif;
+  /* background: #ececec; */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.container {
+  position: absolute;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.ctu-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15rem !important;
+  height: 15  rem !important;
+}
+
+.ctu-logo img {
+  width: 100% !important;
+}
+
+/*------------ Login container ------------*/
+
+.box-area {
+  width: 930px;
+}
+
+.left-box {
+  display: flex;
+  position: relative;
+}
+
+#login-p {
+  color: var(--celestial-blue);
+}
+
+.login-text small {
+  color: var(--black) !important;
+  font-size: 0.75rem !important;
+  /* margin: auto !important; */
+  text-align: center !important;
+}
+
+.shadow {
+  box-shadow: 0 6px 10px var(--gray) !important;
+}
+
+/*------------ Right box ------------*/
+
+.right-box {
+  padding: 1rem !important;
+}
+
+/*------------ Custom Placeholder ------------*/
+
+::placeholder {
+  font-size: 16px;
+}
+
+.rounded-4 {
+  border-radius: 20px;
+}
+.rounded-5 {
+  border-radius: 30px;
+}
+
+.row {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/*------------ For small screens------------*/
+
+@media only screen and (max-width: 768px) {
+  .box-area {
+    margin: 0 10px;
+  }
+  .left-box {
+    height: 100px;
+    overflow: hidden;
+  }
+  .right-box {
+    padding: 20px;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  /* body{
+        background-image: url('../images/bg.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+    } */
+}
