@@ -153,12 +153,10 @@ def update_product(request, pk):
     return redirect(request, 'product.html')
 
 
-# mao ni sa delete product prii, sa views.py ni siya ibutang
 
 def delete_product(request, pk):
     try:
-        product = Products.objects.get(product_id=pk) #kaning product_id kay mao ni siya ang primary key sa Product na model
-        print(product)
+        product = Products.objects.get(product_id=pk) 
         if product:
             product.delete()  
         return redirect('product')  
@@ -307,7 +305,7 @@ class RefillView(View):
             try:
                 with connection.cursor() as cursor:
                     cursor.callproc(
-                        'CheckAndInsertRefill',  # Stored procedure name
+                        'CheckAndInsertRefill',
                         [date, water_tank_id, quantity, total_price, customer_id, product_id]
                     )
                     
@@ -331,7 +329,7 @@ class RefillView(View):
                     self.request,
                     self.template_name,
                     {
-                        'error': error_message,  # Pass formatted error message
+                        'error': error_message,
                         'all_refill_data': Refill.objects.all(),
                     },
                 )
@@ -443,7 +441,7 @@ def customer_pdf(request):
     # Create table data
     customer_data = [['Customer ID', 'First Name', 'Last Name', 'Phone number', 'Address']]
     for customer in all_customer_data:
-        customer_data.append([customer.customer_id, customer.firstname, customer.lastname,  customer.p_number, customer.address])
+        customer_data.append([customer.customer_id, customer.c_firstname, customer.c_lastname,  customer.c_pnumber, customer.c_address])
 
     # Create a table and set its style
     table = Table(customer_data)
