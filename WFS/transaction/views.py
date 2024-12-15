@@ -2,12 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Products, Transaction, Water_tank, Refill, Sales_Reports
 from registration.models import Employee, Customer
 from .forms import productForm, transactionForm, waterTankForm, refillForm
+from .utils import update_water_tank_after_refill
 from django.http import HttpResponseRedirect, FileResponse
 import json
+from django.views import View
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
 from django.utils import timezone
 from datetime import timedelta
 from datetime import datetime
+from django.db import connection
 from django.core.serializers import serialize
+from django.http import JsonResponse, HttpResponseRedirect
 
 
 # imports for generating pdf
@@ -84,22 +90,51 @@ def index(request):
 def login(request):
     return render(request, 'login.html')
 
-def product(request):
-    submitted = False
-    if request.method == "POST":
-        # Get the form data
+class ProductCreateView(View):
+    template_name = 'product.html'
+    success_url = '/transaction/product/?submitted=True'
+    
+    def get(self, request, *args, **kwargs):
+        submitted = 'submitted' in request.GET
+        
+        form = productForm()
+        all_product_data = Products.objects.all()
+        context = {
+            'form': form,
+            'submitted': submitted,
+            'all_product_data': all_product_data
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        # Handle the form submission for POST requests
         form = productForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/transaction/product/?submitted=True")
-    else:
-        form = productForm()
-        if 'submitted' in request.GET:
-            submitted = True
+            # Get the form cleaned data
+            product_name = form.cleaned_data['name']
+            product_description = form.cleaned_data['description']
+            product_price = form.cleaned_data['price']
+            
+            print("Product name:", product_name)
+            print("Product description:", product_description)
+            print("Product price:", product_price)
 
-     # Get all data from the database
-    all_product_data = Products.objects.all()
-    return render(request, 'product.html', {'form' : form, 'submitted': submitted, 'all_product_data' : all_product_data})
+            # Call the stored procedure for additional operations (not for inserting data)
+            try:
+                with connection.cursor() as cursor:
+                    cursor.callproc('AddProduct', [product_name, product_description, product_price])
+                    print("Stored procedure executed.")
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=400)
+
+        all_product_data = Products.objects.all()
+        context = {
+            'form': form,
+            'submitted': False,
+            'all_product_data': all_product_data
+        }
+        return render(request, self.template_name, context)
+
 
 def update_product(request, pk):
     if request.method == "POST":
@@ -224,33 +259,99 @@ def delete_water_tank(request, pk):
     except Transaction.DoesNotExist:
         print("error")
         return redirect('water_tank')
+    
+class RefillView(View):
+    template_name = 'refill.html'
+    success_url = '/transaction/refill/?submitted=True'
 
+    def get(self, request, *args, **kwargs):
+        submitted = 'submitted' in request.GET
 
-def refill(request):
-    submitted = False
-    if request.method == "POST":
-        # Get the form data
+        # Initialize the form and fetch data
+        form = refillForm()
+        all_refill_data = Refill.objects.all()
+        all_product_data = Products.objects.all()
+        product_data_json = serialize('json', all_product_data)
+
+        context = {
+            'form': form,
+            'submitted': submitted,
+            'all_refill_data': all_refill_data,
+            'product_data_json': product_data_json,
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
         form = refillForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/transaction/refill/?submitted=True")
-    else:
-        form = refillForm()
-        if 'submitted' in request.GET:
-            submitted = True
-    # Get all data from the database and display into the table
-    all_refill_data = Refill.objects.all()
-    all_product_data = Products.objects.all() #added
-    product_data_json = serialize('json', all_product_data) # added
-    print(product_data_json)
+            # Extract form data
+            water_tank = form.cleaned_data['water_tank']
+            quantity = form.cleaned_data['quantity']
+            total_price = form.cleaned_data['total_price']
+            date = form.cleaned_data['date']
+            customer = form.cleaned_data['customer']
+            product = form.cleaned_data['product']
+            created_at = timezone.now()
 
-    context = {'form' : form,
-               'submitted': submitted,
-               'all_refill_data' : all_refill_data,
-               'product_data_json' : product_data_json  #added
-               }
-   
-    return render(request, 'refill.html', context )
+            
+             # Validate and extract water_tank_id
+            try:
+                water_tank_id = water_tank.serial_number
+                customer_id = customer.customer_id
+                product_id = product.product_id
+            except AttributeError as e:
+                return JsonResponse({'error': f'Invalid water tank object: {str(e)}'}, status=400)
+
+            # Call the stored procedure
+            try:
+                with connection.cursor() as cursor:
+                    cursor.callproc(
+                        'CheckAndInsertRefill',  # Stored procedure name
+                        [date, water_tank_id, quantity, total_price, customer_id, product_id]
+                    )
+                    
+                try:
+                    water_tank_instance = Water_tank.objects.get(serial_number=water_tank_id)
+                    update_water_tank_after_refill(water_tank_instance, water_tank_instance.pk)
+                except Water_tank.DoesNotExist:
+                    return JsonResponse({'error': 'Water tank does not exist'}, status=404)
+            except Exception as e:
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
+
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        'error': error_message,  # Pass formatted error message
+                        'all_refill_data': Refill.objects.all(),
+                    },
+                )
+        
+
+        # If form is invalid, reload the page with errors
+        all_refill_data = Refill.objects.all()
+        all_product_data = Products.objects.all()
+        product_data_json = serialize('json', all_product_data)
+
+        context = {
+            'form': form,
+            'submitted': False,
+            'all_refill_data': all_refill_data,
+            'product_data_json': product_data_json,
+            'error': 'Form submission failed.',
+        }
+
+        return render(request, self.template_name, context)
+
 
 def update_refill(request, pk):
     if request.method == "POST":

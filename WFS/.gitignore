@@ -88,6 +88,8 @@ local_settings.py
 .env
 db.sqlite3
 
+migrations/
+
 #environment variables
 wrs-env
 

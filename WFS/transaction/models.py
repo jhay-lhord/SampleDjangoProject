@@ -25,7 +25,7 @@ class Refill(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.firstname} {self.customer.lastname} {self.refill_id}"
+        return f"{self.customer.c_firstname} {self.customer.c_lastname} {self.refill_id}"
 
 class Water_tank(models.Model):
     serial_number = models.CharField(max_length=100, null=False, primary_key=True)
@@ -34,7 +34,7 @@ class Water_tank(models.Model):
     current_content = models.IntegerField(null=False)
 
     def __str__(self):
-        return self.serial_number
+        return self.serial_number   
     
     @property
     def total_content(self):
@@ -46,13 +46,6 @@ class Water_tank(models.Model):
         # Calculate the total quantity from related Refill instances
         total_quantity_by_refill_id = Refill.objects.values('refill_id').annotate(total_quantity=Sum('quantity'))
 
-        print(total_quantity_by_refill_id)
-        #total_quantity = Refill.objects.aggregate(models.Sum('quantity'))['quantity__sum'] #get the quantity value from Refill model
-        # if total_quantity_by_refill_id:
-        #     total_liters = total_quantity_by_refill_id * 20 # assumming that the 1 galloon of blue water container is 20liters
-        #     #the calculations for getting the total refilled is quantity * liters per galloon which is the sample is 20
-        # else:
-        #     total_liters = 0
         total_liters = 0
         for entry in total_quantity_by_refill_id:
         # Assuming that 1 gallon of blue water container is 20 liters
@@ -61,6 +54,7 @@ class Water_tank(models.Model):
     
     @property
     def calculated_current_content(self):
+        print("calculated running")
         current = self.total_content - self.total_liters_refilled
         return current
 
@@ -73,16 +67,6 @@ class Water_tank(models.Model):
         self.current_content = self.calculated_current_content
         super().save(*args, **kwargs)
 
-    # @receiver(post_save, sender=Refill)
-    # @receiver(post_delete, sender=Refill)
-    # def update_water_tank(sender, instance, **kwargs):
-    #     # Calculate and update the total_liters_refilled in associated Water_tank instance
-    #     water_tank = instance.water_tank  # Assuming there's a ForeignKey named 'water_tank' in Refill model
-    #     total_liters_refilled = water_tank.total_liters_refilled
-    #     water_tank.liters_refilled = total_liters_refilled
-    #     water_tank.current_content = water_tank.calculated_current_content
-    #     water_tank.save()
-    #     print("water Tank updated")
 
     @receiver(post_save, sender=Refill)
     @receiver(post_delete, sender=Refill)
@@ -90,6 +74,7 @@ class Water_tank(models.Model):
         # Get the associated Water_tank instance
         water_tank = instance.water_tank
         print(water_tank)
+        print("update water tank running")
 
         # Calculate the total quantity for the specific Water_tank
         total_quantity_by_refill_id = Refill.objects.filter(water_tank=water_tank).values('refill_id').annotate(total_quantity=Sum('quantity'))

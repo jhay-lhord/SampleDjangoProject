@@ -220,7 +220,7 @@
                                       {% for transaction in all_transaction_data %}
                                       <tr>
                                         <td class="fs-7">{{transaction.transaction_id}}</td>
-                                        <td class="fs-7">{{transaction.customer.firstname}} {{transaction.customer.lastname}}</td>
+                                        <td class="fs-7">{{transaction.customer.c_firstname}} {{transaction.customer.c_lastname}}</td>
                                         <td class="fs-7">{{transaction.date}}</td>
                                         <td class="fs-7">
                                           <a href="#-{{forloop.counter}}" class="update-employee-link">

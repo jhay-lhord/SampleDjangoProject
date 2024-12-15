@@ -6,9 +6,10 @@ from django.db import connection
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.serializers import serialize
+from django.http import JsonResponse, HttpResponseRedirect
+from django.views.generic.edit import FormView
 
 
-# Create your views here
 
 def user_register(request):
     submitted = False
@@ -52,58 +53,146 @@ class UserLogoutView(View):
         return HttpResponseRedirect(reverse('user_login'))
 
 
-def employee(request):
-    submitted = False
-    if request.method == "POST":
-        # Get the form data
-        form = employeeForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/employee/?submmitted=True")
-    else:
-        form = employeeForm()
-        if 'submitted' in request.GET:
-            submitted = True
-            
-    # Get all data from the database and display into the table
-    all_employee_data = Employee.objects.all()
-    employee_data_json = serialize('json',all_employee_data )
-    context = {'form' : form, 
-        'submitted': submitted,
-        'all_employee_data' : all_employee_data,
-        'employee_data_json' : employee_data_json
-        }
-    
-    return render(request, 'employee.html', context)
+class EmployeeView(FormView):
+    template_name = 'employee.html'
+    form_class = employeeForm
+    success_url = '/employee/?submitted=True'
 
+    def form_valid(self, form):
+        # Get cleaned data from the form
+        print("running")
+        data = form.cleaned_data
+        firstname = data.get('e_firstname')
+        middlename = data.get('e_middlename', '')  # Optional field
+        lastname = data.get('e_lastname')
+        address = data.get('e_address')
+        phone_number = data.get('e_p_number')
+        email = data.get('e_email')
+        password = data.get('e_email')
+        print(data)
 
+        # Call the stored procedure
+        with connection.cursor() as cursor:
+            try:
+                print("calling procedure")
+                cursor.execute(
+                    """
+                    CALL AddEmployee(%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (firstname, middlename, lastname, address, phone_number, email, password)
+                )
+                print("done calling procedure")
+            except Exception as e:
+                # Handle duplicate email or other database errors
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
 
-def update_employee(request, pk):
-    if request.method == "POST":
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+                form = self.form_class()
+
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        'form': form,
+                        'error': error_message,  # Pass formatted error message
+                        'all_employee_data': Employee.objects.all(),
+                    },
+                )
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        submitted = self.request.GET.get('submitted', False)
         
-        firstname = request.POST.get('firstname')
-        middlename = request.POST.get('middlename')
-        lastname = request.POST.get('lastname')
-        p_number = request.POST.get('p_number')
-        email = request.POST.get('email')
-        address = request.POST.get('address')
-        password = request.POST.get('password')
+        # Fetch all employee data
+        all_employee_data = Employee.objects.all()
+        employee_data_json = serialize('json', all_employee_data)
 
-        employee = Employee(
-            employee_id = pk,
-            e_firstname = firstname,
-            e_middlename = middlename,
-            e_lastname = lastname,
-            e_p_number = p_number,
-            e_email = email,
-            e_address = address,
-            e_password = password
-        )
-        employee.save()
-        return redirect('employee')
-        
-    return redirect(request, 'employee.html')
-   
+        context.update({
+            'submitted': submitted,
+            'all_employee_data': all_employee_data,
+            'employee_data_json': employee_data_json,
+        })
+        return context
+
+class UpdateEmployeeView(FormView):
+    print("running")
+    template_name = 'employee.html'  # Your template name
+    form_class = employeeForm
+    success_url = '/employee/'  # Redirect to the employee list after successful update
+    print("running")
+
+    def form_valid(self, form):
+        print("running")
+        # Get cleaned data from the form
+        data = form.cleaned_data
+        firstname = data.get('e_firstname')
+        middlename = data.get('e_middlename', '')
+        lastname = data.get('e_lastname')
+        p_number = data.get('e_p_number')
+        email = data.get('e_email')
+        address = data.get('e_address')
+        password = data.get('e_password')
+
+        print(data)
+
+        # Get the employee ID from the URL (passed as pk)
+        employee_id = self.kwargs['pk']
+        # 
+        # Call the stored procedure to update the employee
+        with connection.cursor() as cursor:
+            try:
+                print("calling procedure")
+                cursor.execute("""
+                    CALL UpdateEmployee(%s, %s, %s, %s, %s, %s, %s, %s)
+                """, [employee_id, firstname, middlename, lastname, address, p_number, email, password])
+            # 
+            except Exception as e:
+                # If an error occurs (e.g., duplicate email), catch it and show a message
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
+
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+                form = self.form_class()
+                print(error_message)
+
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        'form': form,
+                        'error': error_message,  # Pass formatted error message
+                        'all_employee_data': Employee.objects.all(),
+                    },
+                )
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 
+        # Fetch all employee data
+        all_employee_data = Employee.objects.all()
+        employee_data_json = serialize('json', all_employee_data)
+
+        context.update({
+            'all_employee_data': all_employee_data,
+            'employee_data_json': employee_data_json,
+        })
+        return context
+  
 
 def delete_employee(request, pk):
     try:
@@ -115,54 +204,143 @@ def delete_employee(request, pk):
         print("error")
         return redirect('employee') 
 
-def customer(request, pk=None):
-    submitted = False
-    if request.method == "POST":
-        # Get the form data
-        form = customerForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect("/customer/?submmitted=True")
-    else:
-        form = customerForm()
-        if 'submitted' in request.GET:
-            submitted = True
 
+class CustomerView(FormView):
+    template_name = 'customer.html'
+    form_class = customerForm
+    success_url = '/customer/?submitted=True'
 
-     # Get all data from the database
-    all_customer_data = Customer.objects.all()
-    context = {
-        'form': form, 
-        'submitted' : submitted,
-        'all_customer_data' : all_customer_data, 
-        }
-    
-    return render(request, 'customer.html',context )
+    def form_valid(self, form):
+        # Get cleaned data from the form
+        data = form.cleaned_data
+        firstname = data.get('c_firstname')
+        middlename = data.get('c_middlename', '')  # Optional field
+        lastname = data.get('c_lastname')
+        address = data.get('c_address')
+        p_number = data.get('c_pnumber')
+        email = data.get('c_email')
 
-def update_customer(request, pk):
-    if request.method == "POST":
+        # Call the stored procedure to check for duplicate email and insert customer data
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute(
+                    """
+                    CALL AddCustomer(%s, %s, %s, %s, %s, %s)
+                    """,
+                    (firstname, middlename, lastname, address, p_number, email)
+                )
+            except Exception as e:
+                # Handle duplicate email or other database errors
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
+
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+                form = self.form_class()
+
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        'form': form,
+                        'error': error_message,  # Pass formatted error message
+                        'all_customer_data': Customer.objects.all(),
+                    },
+                )
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        submitted = self.request.GET.get('submitted', False)
         
-        firstname = request.POST.get('firstname')
-        middlename = request.POST.get('middlename')
-        lastname = request.POST.get('lastname')
-        p_number = request.POST.get('p_number')
-        email = request.POST.get('email')
-        address = request.POST.get('address')
+        # Fetch all customer data
+        all_customer_data = Customer.objects.all()
+        customer_data_json = serialize('json', all_customer_data)
 
-        customer = Customer(
-            customer_id = pk,
-            firstname = firstname,
-            middlename = middlename,
-            lastname = lastname,
-            p_number = p_number,
-            email = email,
-            address = address
-        )
-        customer.save()
-        return redirect('customer')
-        
-    return redirect(request, 'customer.html')
-   
+        context.update({
+            'submitted': submitted,
+            'all_customer_data': all_customer_data,
+            'customer_data_json': customer_data_json,
+        })
+        return context
+
+
+class UpdateCustomerView(FormView):
+    print("running")
+    template_name = 'customer.html'  # Your template name
+    form_class = customerForm
+    success_url = '/customer/'  # Redirect to the employee list after successful update
+    print("running")
+
+    def form_valid(self, form):
+        print("running")
+        # Get cleaned data from the form
+        data = form.cleaned_data
+        firstname = data.get('c_firstname')
+        middlename = data.get('c_middlename', '')
+        lastname = data.get('c_lastname')
+        p_number = data.get('c_pnumber')
+        email = data.get('c_email')
+        address = data.get('c_address')
+
+        print(data)
+
+        # Get the employee ID from the URL (passed as pk)
+        customer_id = self.kwargs['pk']
+        # 
+        # Call the stored procedure to update the employee
+        with connection.cursor() as cursor:
+            try:
+                print("calling procedure")
+                cursor.execute("""
+                    CALL UpdateCustomer(%s, %s, %s, %s, %s, %s, %s)
+                """, [customer_id, firstname, middlename, lastname, address, p_number, email])
+            # 
+            except Exception as e:
+                # If an error occurs (e.g., duplicate email), catch it and show a message
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
+
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+                form = self.form_class()
+                print(error_message)
+
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        'form': form,
+                        'error': error_message,  # Pass formatted error message
+                        'all_customer_data': Customer.objects.all(),
+                    },
+                )
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 
+        # Fetch all employee data
+        all_customer_data = Customer.objects.all()
+        customer_data_json = serialize('json', all_customer_data)
+
+        context.update({
+            'all_customer_data': all_customer_data,
+            'customer_data_json': customer_data_json,
+        })
+        return context
+
+
 
 def delete_customer(request, pk):
     try:

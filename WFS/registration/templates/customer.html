@@ -20,6 +20,11 @@
       src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -66,7 +71,9 @@
             class="dropdown-menu dropdown-menu-end"
             aria-labelledby="navbarDropdown"
           >
-            <li><a class="dropdown-item" href="{%url 'user_logout'%}">Logout</a></li>
+            <li>
+              <a class="dropdown-item" href="{%url 'user_logout'%}">Logout</a>
+            </li>
           </ul>
         </li>
       </ul>
@@ -148,7 +155,6 @@
                   class="sb-sidenav-menu-nested nav accordion"
                   id="sidenavAccordionPages"
                 >
-                
                   <a class="nav-link" href="{%url 'product'%}">
                     <div class="sb-nav-link-icon">
                       <i class="fa-brands fa-product-hunt"></i>
@@ -217,6 +223,15 @@
       </div>
       <div id="layoutSidenav_content">
         <main>
+          {% if error %}
+          <script>
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "{{ error }}",
+            });
+          </script>
+          {% endif %}
           <div class="container-fluid px-4">
             <div class="d-flex justify-content-between m-1 align-items-center">
               <h1 class="mt-4">Customer</h1>
@@ -232,7 +247,7 @@
             <div class="card mb-4">
               <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-              All Customer Data
+                All Customer Data
               </div>
               <div class="card-body">
                 <table id="datatablesSimple">
@@ -262,37 +277,39 @@
                     {% for customer in all_customer_data %}
                     <tr>
                       <td class="fs-7">{{customer.customer_id}}</td>
-                      <td class="fs-7">{{customer.firstname}}</td>
-                      <td class="fs-7">{{customer.lastname}}</td>
-                      <td class="fs-7">{{customer.address}}</td>
-                      <td class="fs-7">{{customer.p_number}}</td>
-                      <td class="fs-7">{{customer.email}}</td>
-                        <td class="fs-7">
-                          <a href="#-{{forloop.counter}}" class="update-employee-link">
-                            <button
-                              data-employee-id="{{employee.employee_id }}"
-                              data-bs-toggle="modal"
-                              data-bs-target="#updateModal-{{forloop.counter}}"
-                              type="button"
-                              class="btn btn-primary btn-sm edit-employee-link"
-                              id="upload-btn"
-                            >
-                              Edit
-                            </button>
-                          </a>
-                          <a href="#" class="delete-employee-link">
-                            <button
-                              data-customer-id="{{customer.customer_id}}"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteModal"
-                              type="button"
-                              class="btn btn-outline-danger btn-sm delete-customer-link"
-                              
-                            >
-                              Delete
-                            </button>
-                          </a>
-                        </td>
+                      <td class="fs-7">{{customer.c_firstname}}</td>
+                      <td class="fs-7">{{customer.c_lastname}}</td>
+                      <td class="fs-7">{{customer.c_address}}</td>
+                      <td class="fs-7">{{customer.c_pnumber}}</td>
+                      <td class="fs-7">{{customer.c_email}}</td>
+                      <td class="fs-7">
+                        <a
+                          href="#-{{forloop.counter}}"
+                          class="update-employee-link"
+                        >
+                          <button
+                            data-employee-id="{{employee.employee_id }}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#updateModal-{{forloop.counter}}"
+                            type="button"
+                            class="btn btn-primary btn-sm edit-employee-link"
+                            id="upload-btn"
+                          >
+                            Edit
+                          </button>
+                        </a>
+                        <a href="#" class="delete-employee-link">
+                          <button
+                            data-customer-id="{{customer.customer_id}}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            type="button"
+                            class="btn btn-outline-danger btn-sm delete-customer-link"
+                          >
+                            Delete
+                          </button>
+                        </a>
+                      </td>
                     </tr>
                     {%endfor%}
                   </tbody>
@@ -306,7 +323,9 @@
             <div
               class="d-flex align-items-center justify-content-between small"
             >
-              <div class="text-muted">Copyright &copy; Water Refilling System 2023</div>
+              <div class="text-muted">
+                Copyright &copy; Water Refilling System 2023
+              </div>
               <div>
                 <a href="#">Privacy Policy</a>
                 &middot;
@@ -347,23 +366,22 @@
           <div class="modal-body">
             <form method="POST" class="row g-3" enctype="multipart/form-data">
               {% csrf_token%}
+
               <div class="col-md-4 hide-field" id="">
                 <label for="" class="form-label fw-semibold">First Name</label>
                 <!-- <input id="first_name" type="text" class="form-control" /> -->
-                {{form.firstname}}
+                {{form.c_firstname}}
               </div>
 
               <div class="col-md-4 hide-field" id="">
                 <label for="" class="form-label fw-semibold">Middle Name</label>
                 <!-- <input id="middle_name" type="text" class="form-control" /> -->
-                {{form.middlename}}
+                {{form.c_middlename}}
               </div>
 
               <div class="col-md-4 hide-field" id="">
-                <label for="" class="form-label fw-semibold"
-                  >Last Name</label
-                >
-                {{form.lastname}}
+                <label for="" class="form-label fw-semibold">Last Name</label>
+                {{form.c_lastname}}
                 <!-- <input id="last_name" type="text" class="form-control" /> -->
               </div>
 
@@ -371,19 +389,17 @@
                 <label for="" class="form-label fw-semibold"
                   >Phone Number</label
                 >
-                {{form.p_number}}
+                {{form.c_pnumber}}
                 <!-- <input id="phone_number" type="text" class="form-control" /> -->
               </div>
               <div class="col-md-6">
                 <label for="" class="form-label fw-semibold">Email</label>
                 <!-- <input id="email" type="email" class="form-control" /> -->
-                {{form.email}}
+                {{form.c_email}}
               </div>
               <div class="col-12">
-                <label for="" class="form-label fw-semibold"
-                  >Address</label
-                >
-                {{form.address}}
+                <label for="" class="form-label fw-semibold">Address</label>
+                {{form.c_address}}
                 <!-- <input id="current-year" type="text" class="form-control" /> -->
               </div>
 
@@ -396,185 +412,233 @@
       </div>
     </div>
 
-        <!-- modal for updating customer data -->
-        {%for i in all_customer_data%}
-        <div
-        class="modal fade"
-        id="updateModal-{{forloop.counter}}"
-        tabindex="-1"
-        aria-labelledby="AddingFile"
-        aria-hidden="true"
+    <!-- modal for updating customer data -->
+    {%for i in all_customer_data%}
+    <div
+      class="modal fade"
+      id="updateModal-{{forloop.counter}}"
+      tabindex="-1"
+      aria-labelledby="AddingFile"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-lg custom-modal modal-dialog-centered modal-dialog-scrollable modal-fullscreen-xl-down position-relative"
       >
-        <div
-          class="modal-dialog modal-lg custom-modal modal-dialog-centered modal-dialog-scrollable modal-fullscreen-xl-down position-relative"
-        >
-          <div class="modal-content position-relative p-3">
-            <div class="modal-header">
-              <h5
-                class="modal-title text-primary text-opacity-75 fs-5 fw-semibold"
-                id="exampleModalLabel"
-              >
-                Update Customer Information
-              </h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <form method="POST" action="/update_customer/{{i.customer_id}}" class="row g-3" enctype="multipart/form-data">
-                {% csrf_token%}
-                <div class="col-md-4 hide-field" id="">
-                  <label for="" class="form-label fw-semibold">First Name</label>
-                  <input value="{{i.firstname}}" name="firstname" id="first_name" type="text" class="form-control" />
-                  <!-- {{form.firstname}} -->
-                </div>
-  
-                <div class="col-md-4 hide-field" id="">
-                  <label for="" class="form-label fw-semibold">Middle Name</label>
-                  <input value={{i.middlename}} name="middlename" id="middle_name" type="text" class="form-control" />
-                  <!-- {{form.middlename}} -->
-                </div>
-  
-                <div class="col-md-4 hide-field" id="">
-                  <label for="" class="form-label fw-semibold"
-                    >Last Name</label
-                  >
-                  <!-- {{form.lastname}} -->
-                  <input value="{{i.lastname}}" name="lastname" id="last_name" type="text" class="form-control" />
-                </div>
-  
-                <div class="col-md-6">
-                  <label for="" class="form-label fw-semibold"
-                    >Phone Number</label
-                  >
-                  <!-- {{form.p_number}} -->
-                  <input value="{{i.p_number}}" name="p_number" id="phone_number" type="text" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label for="" class="form-label fw-semibold">Email</label>
-                  <input value="{{i.email}}" name="email" id="email" type="email" class="form-control" />
-                  <!-- {{form.email}} -->
-                </div>
-                <div class="col-12">
-                  <label for="" class="form-label fw-semibold"
-                    >Address</label
-                  >
-                  <!-- {{form.address}} -->
-                  <input value="{{i.address}}" name="address" id="current-year" type="text" class="form-control" />
-                </div>
-  
-                <div class="modal-footer bg-body sticky-bottom bottom-0 mb-n1">
-                  <button type="submit" class="btn btn-primary">Update</button>
-                </div>
-              </form>
-            </div>
+        <div class="modal-content position-relative p-3">
+          <div class="modal-header">
+            <h5
+              class="modal-title text-primary text-opacity-75 fs-5 fw-semibold"
+              id="exampleModalLabel"
+            >
+              Update Customer Information
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form
+              method="POST"
+              action="/update_customer/{{i.customer_id}}"
+              class="row g-3"
+              enctype="multipart/form-data"
+            >
+              {% csrf_token%}
+              {% if form.errors %}
+                    <div class="alert alert-danger">
+                    {% for field, error in form.errors.items %}
+                    {{field}}{{ error }}
+                    {% endfor %}
+                    </div>
+                {% endif %}
+              <div class="col-md-4 hide-field" id="">
+                <label for="" class="form-label fw-semibold">First Name</label>
+                <input
+                  value="{{i.c_firstname}}"
+                  name="c_firstname"
+                  id="c_firstname"
+                  type="text"
+                  class="form-control"
+                />
+                <!-- {{form.firstname}} -->
+              </div>
+
+              <div class="col-md-4 hide-field" id="">
+                <label for="" class="form-label fw-semibold">Middle Name</label>
+                <input
+                  value="{{i.c_middlename}}"
+                  name="c_middlename"
+                  id="c_middlename"
+                  type="text"
+                  class="form-control"
+                />
+                <!-- {{form.middlename}} -->
+              </div>
+
+              <div class="col-md-4 hide-field" id="">
+                <label for="" class="form-label fw-semibold">Last Name</label>
+                <!-- {{form.lastname}} -->
+                <input
+                  value="{{i.c_lastname}}"
+                  name="c_lastname"
+                  id="c_lastname"
+                  type="text"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="" class="form-label fw-semibold"
+                  >Phone Number</label
+                >
+                <!-- {{form.p_number}} -->
+                <input
+                  value="{{i.c_pnumber}}"
+                  name="c_pnumber"
+                  id="c_pnumber"
+                  type="text"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-md-6">
+                <label for="" class="form-label fw-semibold">Email</label>
+                <input
+                  value="{{i.c_email}}"
+                  name="c_email"
+                  id="c_email"
+                  type="email"
+                  class="form-control"
+                />
+                <!-- {{form.email}} -->
+              </div>
+              <div class="col-12">
+                <label for="" class="form-label fw-semibold">Address</label>
+                <!-- {{form.address}} -->
+                <input
+                  value="{{i.c_address}}"
+                  name="c_address"
+                  id="c_address"
+                  type="text"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="modal-footer bg-body sticky-bottom bottom-0 mb-n1">
+                <button type="submit" class="btn btn-primary">Update</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-      {% endfor%}
+    </div>
+    {% endfor%}
 
-        <!-- Modal for Deleting Customer -->
-<div
-class="modal fade modal-lg"
-id="deleteModal"
-tabindex="-1"
-role="dialog"
-aria-labelledby="deleteModalLabel"
-aria-hidden="true"
->
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
+    <!-- Modal for Deleting Customer -->
+    <div
+      class="modal fade modal-lg"
+      id="deleteModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="deleteModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this Employee?</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDelete">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <p>Are you sure you want to delete this Employee?</p>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-        Cancel
-      </button>
-      <button type="button" class="btn btn-danger" id="confirmDelete">
-        Delete
-      </button>
-    </div>
-  </div>
-</div>
-</div>
 
     <!-- script for deleting the Customer -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-  const deleteBtn = document.getElementsByClassName("card-body")[0];
-  console.log(deleteBtn)
-  deleteBtn.addEventListener("click", function (event) {
-    
-    if (event.target.classList.contains("delete-customer-link")) {
-      console.log("delete click")
-      event.preventDefault();
-      const customerID = event.target.getAttribute("data-customer-id");
-      console.log(customerID);
-      deleteCustomer(customerID);
-    }
-  });
-
-  function deleteCustomer(customerID) {
-    console.log("delete function run")
-    const confirmDeleteButton = document.getElementById("confirmDelete");
-    console.log(confirmDeleteButton)
-    confirmDeleteButton.addEventListener("click", function () {
-      // Hide the modal
-      console.log("confirm click")
-      deleteModal.classList.remove("show");
-      deleteModal.style.display = "none";
-
-      fetch(`/delete_customer/${customerID}/`, {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": getCookie("csrftoken"),
-        },
-      })
-        .then(function (response) {
-          if (response.status === 200) {
-            location.reload();
-          } else {
-            console.log(response.status)
-            console.error("Failed to delete research");
+        const deleteBtn = document.getElementsByClassName("card-body")[0];
+        console.log(deleteBtn);
+        deleteBtn.addEventListener("click", function (event) {
+          if (event.target.classList.contains("delete-customer-link")) {
+            console.log("delete click");
+            event.preventDefault();
+            const customerID = event.target.getAttribute("data-customer-id");
+            console.log(customerID);
+            deleteCustomer(customerID);
           }
-        })
-        .catch(function (error) {
-          console.error("Error:", error);
         });
-    });
-  }
 
-  // Function to get CSRF token from cookies
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Search for the csrf token cookie
-        if (cookie.startsWith(name + "=")) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+        function deleteCustomer(customerID) {
+          console.log("delete function run");
+          const confirmDeleteButton = document.getElementById("confirmDelete");
+          console.log(confirmDeleteButton);
+          confirmDeleteButton.addEventListener("click", function () {
+            // Hide the modal
+            console.log("confirm click");
+            deleteModal.classList.remove("show");
+            deleteModal.style.display = "none";
+
+            fetch(`/delete_customer/${customerID}/`, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+            })
+              .then(function (response) {
+                if (response.status === 200) {
+                  location.reload();
+                } else {
+                  console.log(response.status);
+                  console.error("Failed to delete research");
+                }
+              })
+              .catch(function (error) {
+                console.error("Error:", error);
+              });
+          });
         }
-      }
-    }
-    return cookieValue;
-  }
-});
 
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Search for the csrf token cookie
+              if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(
+                  cookie.substring(name.length + 1)
+                );
+                break;
+              }
+            }
+          }
+          return cookieValue;
+        }
+      });
     </script>
 
     <script
@@ -591,6 +655,5 @@ aria-hidden="true"
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-
   </body>
 </html>
