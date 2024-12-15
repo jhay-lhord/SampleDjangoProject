@@ -125,7 +125,8 @@ class EmployeeView(FormView):
 class UpdateEmployeeView(FormView):
     template_name = 'employee.html'
     form_class = employeeForm
-    success_url = '/employee/'  # Redirect to the employee list after successful update
+    success_url = '/employee/'
+    print("running")
 
     def form_valid(self, form):
         print("running")
@@ -170,7 +171,7 @@ class UpdateEmployeeView(FormView):
                     self.template_name,
                     {
                         'form': form,
-                        'error': error_message,  # Pass formatted error message
+                        'error': error_message,
                         'all_employee_data': Employee.objects.all(),
                     },
                 )
@@ -308,7 +309,6 @@ class UpdateCustomerView(FormView):
                 # Remove any trailing quotes or parentheses
                 error_message = error_message.strip("()'")
                 form = self.form_class()
-                print(error_message)
 
                 return render(
                     self.request,
