@@ -20,6 +20,12 @@
       src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
       crossorigin="anonymous"
     ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   </head>
   <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -218,6 +224,25 @@
       </div>
       <div id="layoutSidenav_content">
         <main>
+          {% if error %}
+          <script>
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "{{ error }}",
+            });
+          </script>
+          {% endif %}
+
+          {% if success %}
+          <script>
+            Swal.fire({
+              icon: "success",
+              title: "Oops...",
+              text: "{{ success }}",
+            });
+          </script>
+          {% endif %}
           <div class="container-fluid px-4">
             <div class="d-flex justify-content-between m-1 align-items-center">
               <h1 class="mt-4">Product</h1>

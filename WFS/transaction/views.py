@@ -95,11 +95,14 @@ class ProductCreateView(View):
     
     def get(self, request, *args, **kwargs):
         submitted = 'submitted' in request.GET
-        
+        error_message = request.session.pop('error', None)
+        success_message = request.session.pop('success', None)
         form = productForm()
         all_product_data = Products.objects.all()
         context = {
             'form': form,
+            'error': error_message,
+            'success': success_message,
             'submitted': submitted,
             'all_product_data': all_product_data
         }
@@ -114,17 +117,26 @@ class ProductCreateView(View):
             product_description = form.cleaned_data['description']
             product_price = form.cleaned_data['price']
             
-            print("Product name:", product_name)
-            print("Product description:", product_description)
-            print("Product price:", product_price)
 
             # Call the stored procedure for additional operations (not for inserting data)
             try:
                 with connection.cursor() as cursor:
                     cursor.callproc('AddProduct', [product_name, product_description, product_price])
-                    print("Stored procedure executed.")
+                    request.session['success'] = "Product successfully added"
+                    
             except Exception as e:
-                return JsonResponse({'error': str(e)}, status=400)
+                # Extract the error message, remove single quotes and parentheses
+                raw_message = str(e)
+                if ":" in raw_message:
+                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                else:
+                    error_message = raw_message.strip()
+
+                # Remove any trailing quotes or parentheses
+                error_message = error_message.strip("()'")
+                request.session['error'] = error_message
+            return redirect('/transaction/product/?error=True')
+
 
         all_product_data = Products.objects.all()
         context = {
@@ -261,14 +273,18 @@ class RefillView(View):
         submitted = 'submitted' in request.GET
 
         # Initialize the form and fetch data
+        error_message = request.session.pop('error', None)
+        success_message = request.session.pop('success', None)
         form = refillForm()
         all_refill_data = Refill.objects.all()
         all_product_data = Products.objects.all()
         product_data_json = serialize('json', all_product_data)
-
+        
         context = {
             'form': form,
             'submitted': submitted,
+            'error': error_message,
+            'success': success_message,
             'all_refill_data': all_refill_data,
             'product_data_json': product_data_json,
         }
@@ -307,6 +323,8 @@ class RefillView(View):
                 try:
                     water_tank_instance = Water_tank.objects.get(serial_number=water_tank_id)
                     update_water_tank_after_refill(water_tank_instance, water_tank_instance.pk)
+                    request.session['success'] = "Refill Data successfully added"
+                    
                 except Water_tank.DoesNotExist:
                     return JsonResponse({'error': 'Water tank does not exist'}, status=404)
             except Exception as e:
@@ -319,15 +337,9 @@ class RefillView(View):
 
                 # Remove any trailing quotes or parentheses
                 error_message = error_message.strip("()'")
-
-                return render(
-                    self.request,
-                    self.template_name,
-                    {
-                        'error': error_message,
-                        'all_refill_data': Refill.objects.all(),
-                    },
-                )
+                request.session['error'] = error_message
+            return redirect('/transaction/refill/?error=True')
+                        
         
 
         # If form is invalid, reload the page with errors
@@ -340,7 +352,6 @@ class RefillView(View):
             'submitted': False,
             'all_refill_data': all_refill_data,
             'product_data_json': product_data_json,
-            'error': 'Form submission failed.',
         }
 
         return render(request, self.template_name, context)

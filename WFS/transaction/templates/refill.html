@@ -232,6 +232,16 @@
             });
           </script>
           {% endif %}
+
+          {% if success %}
+          <script>
+            Swal.fire({
+              icon: "success",
+              title: "Oops...",
+              text: "{{ success }}",
+            });
+          </script>
+          {% endif %}
           <div class="container-fluid px-4">
             <div class="d-flex justify-content-between m-1 align-items-center">
               <h1 class="mt-4">Refill</h1>
