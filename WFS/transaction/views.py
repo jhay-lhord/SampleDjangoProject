@@ -45,7 +45,6 @@ def index(request):
         for sales in sales_data_specific_date:
             sales_specific_data += sales.total_price
         total_sales_per_day.append(sales_specific_data)
-    print(total_sales_per_day)
     # convert into json so that it can access with js
     total_sales_per_day_json = json.dumps(total_sales_per_day)
     date_range_labels_json = json.dumps([date.strftime('%Y-%m-%d') for date in date_range])
@@ -207,12 +206,10 @@ def update_transaction(request, pk):
 def delete_transaction(request, pk):
     try:
         transaction = Transaction.objects.get(transaction_id=pk)
-        print(transaction)
         if transaction:
             transaction.delete()  
         return redirect('transaction')  
     except Transaction.DoesNotExist:
-        print("error")
         return redirect('transaction')
 
 def water_tank(request):
@@ -250,12 +247,10 @@ def update_water_tank(request, pk):
 def delete_water_tank(request, pk):
     try:
         water_tank = Water_tank.objects.get(serial_number=pk)
-        print("refill", water_tank)
         if water_tank:
             water_tank.delete()  
         return redirect('water_tank')  
     except Transaction.DoesNotExist:
-        print("error")
         return redirect('water_tank')
     
 class RefillView(View):
@@ -359,11 +354,8 @@ def update_refill(request, pk):
         quantity = request.POST.get('quantity')
         total_price = request.POST.get('total_price')
         
-        print("serial_number", serial_number)
         customer = get_object_or_404(Customer, pk=customer_id)
         tank = get_object_or_404(Water_tank, pk=serial_number)
-        print("tank", tank)
-        print("customer", customer)
         refill = Refill(
             refill_id = pk,
             customer = customer,
@@ -381,12 +373,10 @@ def update_refill(request, pk):
 def delete_refill(request, pk):
     try:
         refill = Refill.objects.get(refill_id=pk)
-        print("refill", refill)
         if refill:
             refill.delete()  
         return redirect('refill')  
     except Transaction.DoesNotExist:
-        print("error")
         return redirect('refill')
 
 
@@ -400,8 +390,6 @@ def sales(request):
     transaction_id = None
     total_sales = 0
     for sales in all_sales_data:
-        print(sales.transaction_id.transaction_id)
-        print("Refill ", sales.transaction_id.refill.total_price)
         # Check if the transaction has a customer
         if sales.transaction_id.customer:
 
@@ -414,7 +402,6 @@ def sales(request):
             total_sales = sales.sales
 
             refill_data = {
-                # 'refills' : refills,
                 'firstname' : firstname,
                 'lastname' : lastname,
                 'transaction_id' : transaction_id,

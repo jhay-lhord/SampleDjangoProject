@@ -123,11 +123,9 @@ class EmployeeView(FormView):
         return context
 
 class UpdateEmployeeView(FormView):
-    print("running")
     template_name = 'employee.html'
     form_class = employeeForm
     success_url = '/employee/'  # Redirect to the employee list after successful update
-    print("running")
 
     def form_valid(self, form):
         print("running")
@@ -141,7 +139,6 @@ class UpdateEmployeeView(FormView):
         address = data.get('e_address')
         password = data.get('e_password')
 
-        print(data)
 
         # Get the employee ID from the URL (passed as pk)
         employee_id = self.kwargs['pk']
@@ -271,11 +268,9 @@ class CustomerView(FormView):
 
 
 class UpdateCustomerView(FormView):
-    print("running")
     template_name = 'customer.html'  # Your template name
     form_class = customerForm
     success_url = '/customer/'  # Redirect to the employee list after successful update
-    print("running")
 
     def form_valid(self, form):
         print("running")
@@ -349,5 +344,4 @@ def delete_customer(request, pk):
             customer.delete()  
         return redirect('customer')  
     except Customer.DoesNotExist:
-        print("error")
         return redirect('customer')
