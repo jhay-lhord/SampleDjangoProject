@@ -562,24 +562,19 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const deleteBtn = document.getElementsByClassName("card-body")[0];
-        console.log(deleteBtn);
         deleteBtn.addEventListener("click", function (event) {
           if (event.target.classList.contains("delete-refill-link")) {
-            console.log("delete click");
             event.preventDefault();
             const refillID = event.target.getAttribute("data-refill-id");
-            console.log(refillID);
             deleteRefill(refillID);
           }
         });
 
         function deleteRefill(refillID) {
-          console.log("delete function run");
           const confirmDeleteButton = document.getElementById("confirmDelete");
           console.log(confirmDeleteButton);
           confirmDeleteButton.addEventListener("click", function () {
             // Hide the modal
-            console.log("confirm click");
             deleteModal.classList.remove("show");
             deleteModal.style.display = "none";
 
@@ -634,8 +629,6 @@
         let old_price;
         let product_price;
 
-        console.log(product_data);
-
         product_data.forEach((product) => {
           product_classification = product.fields.name;
           console.log(product_classification);
@@ -665,10 +658,7 @@
         });
 
         quantity.addEventListener("keyup", () => {
-          console.log(product_price);
-          console.log("quantity change");
           const total = quantity.value * product_price;
-          console.log(total);
           totalPrice.value = total;
         });
       });

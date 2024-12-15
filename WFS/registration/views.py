@@ -63,7 +63,7 @@ class EmployeeView(FormView):
         print("running")
         data = form.cleaned_data
         firstname = data.get('e_firstname')
-        middlename = data.get('e_middlename', '')  # Optional field
+        middlename = data.get('e_middlename', '')
         lastname = data.get('e_lastname')
         address = data.get('e_address')
         phone_number = data.get('e_p_number')
@@ -100,7 +100,7 @@ class EmployeeView(FormView):
                     self.template_name,
                     {
                         'form': form,
-                        'error': error_message,  # Pass formatted error message
+                        'error': error_message,
                         'all_employee_data': Employee.objects.all(),
                     },
                 )
@@ -124,7 +124,7 @@ class EmployeeView(FormView):
 
 class UpdateEmployeeView(FormView):
     print("running")
-    template_name = 'employee.html'  # Your template name
+    template_name = 'employee.html'
     form_class = employeeForm
     success_url = '/employee/'  # Redirect to the employee list after successful update
     print("running")
@@ -159,7 +159,7 @@ class UpdateEmployeeView(FormView):
                 # Extract the error message, remove single quotes and parentheses
                 raw_message = str(e)
                 if ":" in raw_message:
-                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                    error_message = raw_message.split(":", 1)[-1].strip()
                 else:
                     error_message = raw_message.strip()
 
@@ -214,7 +214,7 @@ class CustomerView(FormView):
         # Get cleaned data from the form
         data = form.cleaned_data
         firstname = data.get('c_firstname')
-        middlename = data.get('c_middlename', '')  # Optional field
+        middlename = data.get('c_middlename', '')
         lastname = data.get('c_lastname')
         address = data.get('c_address')
         p_number = data.get('c_pnumber')
@@ -234,7 +234,7 @@ class CustomerView(FormView):
                 # Extract the error message, remove single quotes and parentheses
                 raw_message = str(e)
                 if ":" in raw_message:
-                    error_message = raw_message.split(":", 1)[-1].strip()  # Remove error code
+                    error_message = raw_message.split(":", 1)[-1].strip()
                 else:
                     error_message = raw_message.strip()
 
@@ -247,7 +247,7 @@ class CustomerView(FormView):
                     self.template_name,
                     {
                         'form': form,
-                        'error': error_message,  # Pass formatted error message
+                        'error': error_message, 
                         'all_customer_data': Customer.objects.all(),
                     },
                 )
@@ -320,7 +320,7 @@ class UpdateCustomerView(FormView):
                     self.template_name,
                     {
                         'form': form,
-                        'error': error_message,  # Pass formatted error message
+                        'error': error_message, 
                         'all_customer_data': Customer.objects.all(),
                     },
                 )
